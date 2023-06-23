@@ -19,7 +19,11 @@
 package io.github.realyusufismail.springemailhandler;
 
 import io.github.realyusufismail.springemailhandler.codes.StatusCodes;
+import io.github.realyusufismail.springemailhandler.env.DotenvConfig;
+import io.github.realyusufismail.springemailhandler.env.JsonConfig;
 import io.github.realyusufismail.springemailhandler.impl.EmailRestMethodsImpl;
+import io.github.realyusufismail.springemailhandler.verfication.JwtUtil;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -30,8 +34,9 @@ import org.springframework.web.bind.annotation.*;
 @SpringBootApplication
 @RestController
 @Service
-@RequestMapping("/api/v1.0.0/email")
+@RequestMapping("/api/v1.0.0")
 public class Main implements EmailRestMethods {
+	private static final Logger logger = org.slf4j.LoggerFactory.getLogger(Main.class);
 
 	@Autowired
 	private JavaMailSender javaMailSender;
@@ -40,17 +45,37 @@ public class Main implements EmailRestMethods {
 
 	public static void main(String[] args) {
 		SpringApplication.run(Main.class, args);
+		var token = JwtUtil.generateToken();
+		JsonConfig.config.set("JWT_SECRET_KEY", token);
+		logger.info("JWT_SECRET_KEY: {}", token);
 	}
 
-	@PutMapping("/send")
+	@PostMapping("/email/send")
 	@Override
 	public StatusCodes triggerEmailSend(@RequestHeader("Authorization") String token, @RequestBody EmailBody body) {
 		return emailRestMethods.triggerEmailSend(token, body);
 	}
 
-	@GetMapping("/status")
+	@GetMapping("/email/status")
 	@Override
 	public StatusCodes getStatus() {
 		return emailRestMethods.getStatus();
+	}
+
+	@GetMapping("/email")
+	public String info() {
+		return """
+				   To send an email, you need to send a POST request to /api/v1.0.0/email/send with the following body:
+				```json
+				{
+				    "emailTo": "",
+				    "emailFrom": "",
+				    "subject": "",
+				    "body": ""
+				}
+				```
+				You will also need to provide a token in the header of the request. The token is generated using the JWT_SECRET_KEY in the .env file. The token is valid for 1 hour.
+				To get the status of the service, you need to send a GET request to /api/v1.0.0/email/status. You will also need to provide a token in the header of the request. The token is generated using the JWT_SECRET_KEY in the .env file. The token is valid for 1 hour.
+				""".stripIndent();
 	}
 }

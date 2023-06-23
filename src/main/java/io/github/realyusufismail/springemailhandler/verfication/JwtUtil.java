@@ -30,11 +30,11 @@ public class JwtUtil {
 	private static final String SECRET_KEY = dotenv.get("JWT_SECRET_KEY");
 	private static final long EXPIRATION_TIME_MS = 86400000; // 24 hours
 
-	public static String generateToken(String subject) {
+	public static String generateToken() {
 		Date now = new Date();
 		Date expiration = new Date(now.getTime() + EXPIRATION_TIME_MS);
 
-		return Jwts.builder().setSubject(subject).setIssuedAt(now).setExpiration(expiration)
+		return Jwts.builder().setIssuedAt(now).setExpiration(expiration)
 				.signWith(SignatureAlgorithm.HS256, SECRET_KEY).compact();
 	}
 
