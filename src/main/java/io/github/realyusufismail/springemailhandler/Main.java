@@ -42,7 +42,7 @@ public class Main implements EmailRestMethods {
 		SpringApplication.run(Main.class, args);
 	}
 
-	@PutMapping
+	@PutMapping("/send")
 	@Override
 	public StatusCodes triggerEmailSend(@RequestHeader("Authorization") String token, @RequestBody EmailBody body) {
 		return emailRestMethods.triggerEmailSend(token, body);
