@@ -2,19 +2,16 @@ package io.github.realyusufismail.springemailhandler;
 
 import io.github.realyusufismail.springemailhandler.codes.StatusCodes;
 import io.github.realyusufismail.springemailhandler.impl.EmailRestMethodsImpl;
+import io.github.realyusufismail.springemailhandler.verfication.JwtUtil;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @SpringBootApplication
 @RestController
 @RequestMapping("/api/v1.0.0/email")
 public class Main implements EmailRestMethods {
-	EmailRestMethods emailRestMethods = new EmailRestMethodsImpl();
-	private StatusCodes statusCodes;
+	private final EmailRestMethods emailRestMethods = new EmailRestMethodsImpl();
 
 
 	public static void main(String[] args) {
@@ -24,14 +21,13 @@ public class Main implements EmailRestMethods {
 
 	@PutMapping
 	@Override
-	public StatusCodes triggerEmailSend(@RequestBody EmailBody body) {
-		emailRestMethods.triggerEmailSend(body);
-		this.statusCodes = StatusCodes.SUCCESS;
-		return statusCodes;
+	public StatusCodes triggerEmailSend(@RequestHeader("Authorization") String token,  @RequestBody EmailBody body) {
+		return emailRestMethods.triggerEmailSend(token, body);
 	}
 
+	@GetMapping("/status")
 	@Override
 	public StatusCodes getStatus() {
-		return statusCodes;
+		return emailRestMethods.getStatus();
 	}
 }
